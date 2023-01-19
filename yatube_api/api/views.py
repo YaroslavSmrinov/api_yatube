@@ -1,15 +1,10 @@
-from posts.models import Group, Post, User
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
+from posts.models import Group, Post, User
 from .permissions import IsAuthor
-from .serializers import (CommentSerializer, GroupSerializer, PostSerializer,
-                          UserSerializer)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -32,12 +27,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         pk = self.kwargs.get('post_id')
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         serializer.save(author=post.author, post=post)
 
     def get_queryset(self):
         pk = self.kwargs.get('post_id')
-        post = Post.objects.get(pk=pk)
-        queryset = post.comments.all()
-
-        return queryset
+        post = get_object_or_404(Post, pk=pk)
+        return post.comments.all()
